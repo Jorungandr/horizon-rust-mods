@@ -1,0 +1,11 @@
+# Coordinates HUD: a native trait mod (docs/native-mods.md, "Trait mods").
+# Build it with `horizon-launcher native-build <this folder> --trust-native-code`.
+[mod]
+id = "coords"
+version = "0.1.0"
+
+[compatibility]
+horizon_revision = "9ee13cd038559db05de6a4ced4496028ce409564"
+
+[api]
+path = "api"

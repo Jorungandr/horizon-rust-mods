@@ -1,0 +1,10 @@
+[package]
+name = "timeformatter-hook-verify"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
+mod_api = { path = "mod_api" }
+chrono = { version = "0.4.42", default-features = false, features = ["clock", "std"] }
+
+[workspace]

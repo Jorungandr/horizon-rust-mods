@@ -1,0 +1,41 @@
+[mod]
+id = "whenchat"
+version = "0.1.0"
+priority = 100
+
+# `client_chat_received` (v2) landed on main on 2026-11-16 (PR #17145,
+# mod-api-merge) and is not in an older tagged Nightly yet. Pin the exact
+# main commit that contains the hook until a Nightly carries it.
+[compatibility]
+horizon_revision = "9ee13cd038559db05de6a4ced4496028ce409564"
+
+# runtime.rs becomes crate::game::whenchat.
+[[module]]
+id = "runtime"
+file = "crates/horizon-client/src/game.rs"
+name = "whenchat"
+source = "runtime.rs"
+
+# The mod's row in Options > Mods.
+[[injection]]
+id = "list"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_mods"
+helper = "list.rs"
+bindings = [
+  { name = "mods", ty = "&mut Vec<crate::game::native_hooks::NativeMod>", value = "&mut *mods" },
+]
+
+# Replace incoming chat text with a timestamped line. Binds the real hook's
+# expanded parameters (see native_hooks.rs): &mut self, system, overlay, message.
+[[injection]]
+id = "chat"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_client_chat_received"
+helper = "chat.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "system", ty = "bool", value = "system" },
+  { name = "overlay", ty = "bool", value = "overlay" },
+  { name = "message", ty = "&mut Text", value = "&mut *message" },
+]

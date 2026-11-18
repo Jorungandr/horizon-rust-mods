@@ -1,0 +1,25 @@
+# Rust build output
+target/
+**/target/
+*.rmeta
+*.rlib
+*.d
+
+# Caches
+__pycache__/
+*.pyc
+
+# Local build tree, prepared game resources, scratch state
+build-win/
+horizon-mods-staging/
+dist/
+release/
+game/
+.local/
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini

@@ -1,0 +1,37 @@
+[mod]
+id = "timeformatter"
+version = "0.1.0"
+priority = 100
+
+# Same commit as the other ports: contains client_chat_received (v2) plus the
+# native_mods hook point used for the Options > Mods row.
+[compatibility]
+horizon_revision = "9ee13cd038559db05de6a4ced4496028ce409564"
+
+# runtime.rs becomes crate::game::timeformatter (ID/NAME + format_literal).
+[[module]]
+id = "runtime"
+file = "crates/horizon-client/src/game.rs"
+name = "timeformatter"
+source = "runtime.rs"
+
+# The mod's row in Options > Mods.
+[[injection]]
+id = "list"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_mods"
+helper = "list.rs"
+bindings = [
+  { name = "mods", ty = "&mut Vec<crate::game::native_hooks::NativeMod>", value = "&mut *mods" },
+]
+
+# Replace Discord-style <t:...> tags in incoming chat with local time.
+[[injection]]
+id = "chat"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_client_chat_received"
+helper = "chat.rs"
+bindings = [
+  { name = "overlay", ty = "bool", value = "overlay" },
+  { name = "message", ty = "&mut Text", value = "&mut *message" },
+]

@@ -1,0 +1,62 @@
+[mod]
+id = "chattimestamps"
+version = "0.1.0"
+priority = 100
+
+# Same commit as the WhenChat port: contains client_chat_received (v2) plus the
+# native_settings / native_settings_click / native_mods hook points used here.
+[compatibility]
+horizon_revision = "9ee13cd038559db05de6a4ced4496028ce409564"
+
+# runtime.rs becomes crate::game::chattimestamps (settings, formats, presets).
+[[module]]
+id = "runtime"
+file = "crates/horizon-client/src/game.rs"
+name = "chattimestamps"
+source = "runtime.rs"
+
+# The mod's row in Options > Mods.
+[[injection]]
+id = "list"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_mods"
+helper = "list.rs"
+bindings = [
+  { name = "mods", ty = "&mut Vec<crate::game::native_hooks::NativeMod>", value = "&mut *mods" },
+]
+
+# Three settings buttons (toggle, format preset, hover-only).
+[[injection]]
+id = "settings"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_settings"
+helper = "settings.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "mod_id", ty = "&str", value = "mod_id" },
+  { name = "buttons", ty = "&mut Vec<String>", value = "&mut *buttons" },
+]
+
+# Persist a settings click.
+[[injection]]
+id = "click"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_settings_click"
+helper = "click.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "mod_id", ty = "&str", value = "mod_id" },
+  { name = "button", ty = "usize", value = "button" },
+]
+
+# Replace incoming chat text with the configured timestamp (prefix or hover).
+[[injection]]
+id = "chat"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_client_chat_received"
+helper = "chat.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "overlay", ty = "bool", value = "overlay" },
+  { name = "message", ty = "&mut Text", value = "&mut *message" },
+]

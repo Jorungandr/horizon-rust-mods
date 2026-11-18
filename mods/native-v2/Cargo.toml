@@ -1,0 +1,19 @@
+# Type-check workspace for the new-format (trait mod) projects.
+# The launcher does not need this file: it makes its own workspace. It exists
+# so the three ports can be checked against the local Horizon checkout here.
+[workspace]
+resolver = "2"
+exclude = ["probe"]
+members = [
+    "whenchat/api",
+    "timeformatter/api",
+    "chattimestamps/api",
+    "coords/api",
+]
+
+# The same replacements the Horizon workspace applies; without them the
+# dependency graph cannot resolve offline.
+[patch.crates-io]
+wgpu-hal = { path = "../build-win/horizon-src/third_party/wgpu-hal" }
+naga = { path = "../build-win/horizon-src/third_party/naga" }
+libmimalloc-sys = { path = "../build-win/horizon-src/third_party/libmimalloc-sys" }

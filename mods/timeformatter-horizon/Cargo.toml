@@ -1,0 +1,16 @@
+[package]
+name = "timeformatter-horizon"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+description = "Unofficial Rust port of m3z0id's TimeFormatter for Horizon: formats Discord-style <t:...> tags into local time."
+
+[lib]
+path = "mixins/timeformatter/runtime.rs"
+
+# The game crate already depends on chrono 0.4.42 with `clock` + `std`.
+# Declaring the same dependency here lets this crate's own `cargo test` run;
+# when the helper is injected into the game it uses the game's copy.
+[dependencies]
+chrono = { version = "0.4.42", default-features = false, features = ["clock", "std"] }
