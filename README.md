@@ -45,7 +45,7 @@ The `mods/native-v2/` projects are written in the official new format and pass `
 
 ## Quick start
 
-The [latest release](../../releases/latest) ships a ready-to-run Windows package (compiled client + scripts + sources). After extracting:
+The [latest release](https://github.com/Jorungandr/horizon-rust-mods/releases/latest) ships a ready-to-run Windows package (compiled client + scripts + sources). After extracting:
 
 1. Run `PREPARE_RESOURCES.cmd` once to import the 26.3 resources from **your own** Minecraft Java Edition (Horizon and this package contain no Minecraft assets).
 2. Run `START_GAME.cmd` to launch with all six mods.
