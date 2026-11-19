@@ -678,6 +678,7 @@ pub fn apply(
     let data = ItemData {{
         id: &stack.item,
         count: stack.count,
+        max_stack: info.max_stack,
         damage: stack.damage,
         max_damage: info.max_damage,
     }};

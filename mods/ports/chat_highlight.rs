@@ -131,12 +131,28 @@ pub fn keywords(settings: &Settings) -> Vec<String> {
         .collect()
 }
 
+/// Lowercase `s` for case-insensitive matching, but keep a strict 1:1 mapping
+/// between the characters of the result and the original. `str::to_lowercase`
+/// expands some code points (notably `İ` U+0130 becomes the two chars `i̇`),
+/// which would break the char indices `highlight` uses to slice the original
+/// line. Per-character lowercasing that expands to more than one char is left
+/// as-is: those code points simply won't match case-insensitively, which is a
+/// far better outcome than a mis-sliced or panicking highlight.
 fn normalise(s: &str, match_case: bool) -> String {
     if match_case {
-        s.to_owned()
-    } else {
-        s.to_lowercase()
+        return s.to_owned();
     }
+    s.chars()
+        .map(|c| {
+            let mut lower = c.to_lowercase();
+            let first = lower.next().unwrap_or(c);
+            if lower.next().is_some() {
+                c // multi-char expansion: keep original to preserve 1:1 indices
+            } else {
+                first
+            }
+        })
+        .collect()
 }
 
 /// A run of text and whether it is a highlighted match.
@@ -291,6 +307,19 @@ mod tests {
         assert_eq!(pieces[0].text, "こんにちは");
         assert_eq!(pieces[1].text, "世界");
         assert!(pieces[1].hit);
+    }
+
+    #[test]
+    fn case_folding_that_expands_chars_keeps_indices_aligned() {
+        // 'İ'.to_lowercase() is two chars ("i" + combining dot). Naive
+        // lowercasing used to shift the indices used to slice the original,
+        // mis-highlighting or panicking. The line must come back verbatim and
+        // in one piece when no keyword matches.
+        let pieces = highlight("İSTANBUL", &words(&["istanbul"]), false);
+        assert_eq!(pieces.iter().map(|p| p.text.as_str()).collect::<String>(), "İSTANBUL");
+        // A plain ASCII match after such a character still slices correctly.
+        let pieces = highlight("İ go SERVER now", &words(&["server"]), false);
+        assert_eq!(pieces[1], Piece { text: "SERVER".to_owned(), hit: true });
     }
 
     #[test]

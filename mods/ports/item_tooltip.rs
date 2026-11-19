@@ -89,6 +89,10 @@ fn on_off(value: bool) -> &'static str {
 pub struct ItemData<'a> {
     pub id: &'a str,
     pub count: u32,
+    /// The item's real stack limit (64 for most blocks, 16 for ender pearls,
+    /// 1 for buckets). Passed through from the engine so the stack line is
+    /// never wrong.
+    pub max_stack: u32,
     pub damage: u32,
     /// 0 when the item has no durability (a tool with 250 max, etc.).
     pub max_damage: u32,
@@ -116,7 +120,10 @@ pub fn durability_color(remaining: u32, max: u32) -> u32 {
     if max == 0 {
         return GRAY;
     }
-    let pct = remaining * 100 / max;
+    // Widen before multiplying: `remaining * 100` can overflow u32 for very
+    // large (hand-edited) durability values, panicking in debug or wrapping
+    // in release. u64 has ample headroom for any u32 operand.
+    let pct = (u64::from(remaining) * 100 / u64::from(max)) as u32;
     if pct > 50 {
         GREEN
     } else if pct > 20 {
@@ -144,7 +151,7 @@ pub fn extra_lines(settings: &Settings, item: &ItemData) -> Vec<Line> {
     }
     if settings.show_stack && item.count > 1 {
         out.push(Line {
-            text: format!("Stack: {} / {}", item.count, 64),
+            text: format!("Stack: {} / {}", item.count, item.max_stack),
             color: GRAY,
         });
     }
@@ -156,18 +163,43 @@ mod tests {
     use super::*;
 
     fn pickaxe() -> ItemData<'static> {
-        ItemData { id: "minecraft:diamond_pickaxe", count: 1, damage: 50, max_damage: 1561 }
+        ItemData {
+            id: "minecraft:diamond_pickaxe",
+            count: 1,
+            max_stack: 1,
+            damage: 50,
+            max_damage: 1561,
+        }
     }
 
     #[test]
     fn all_lines_for_a_durable_stack() {
         let s = Settings::default();
-        let item = ItemData { count: 3, ..pickaxe() };
+        let item = ItemData { count: 3, max_stack: 16, ..pickaxe() };
         let lines = extra_lines(&s, &item);
         assert_eq!(lines.len(), 3);
         assert_eq!(lines[0], Line { text: "ID: minecraft:diamond_pickaxe".into(), color: GRAY });
         assert_eq!(lines[1].text, "Durability: 1511 / 1561");
-        assert_eq!(lines[2].text, "Stack: 3 / 64");
+        // Uses the item's real stack limit, not a hardcoded 64.
+        assert_eq!(lines[2].text, "Stack: 3 / 16");
+    }
+
+    #[test]
+    fn stack_line_uses_real_limit_not_64() {
+        let s = Settings::default();
+        // A bucket stacks to 1, an ender pearl to 16, most blocks to 64.
+        for (count, limit) in [(1, 1u32), (9, 16), (40, 64)] {
+            let item = ItemData {
+                id: "minecraft:test",
+                count: count.max(2), // >1 so the line is emitted
+                max_stack: limit,
+                damage: 0,
+                max_damage: 0,
+            };
+            let lines = extra_lines(&s, &item);
+            let stack = lines.iter().find(|l| l.text.starts_with("Stack")).unwrap();
+            assert_eq!(stack.text, format!("Stack: {} / {}", item.count, limit));
+        }
     }
 
     #[test]
@@ -181,9 +213,17 @@ mod tests {
     }
 
     #[test]
+    fn durability_color_does_not_overflow_on_huge_values() {
+        // remaining * 100 used to overflow u32 here; u64 widening must not.
+        assert_eq!(durability_color(u32::MAX, u32::MAX), GREEN);
+        assert_eq!(durability_color(u32::MAX / 2, u32::MAX), YELLOW);
+        assert_eq!(durability_color(0, u32::MAX), RED);
+    }
+
+    #[test]
     fn non_durable_item_has_no_durability_line() {
         let s = Settings::default();
-        let item = ItemData { id: "minecraft:stone", count: 8, damage: 0, max_damage: 0 };
+        let item = ItemData { id: "minecraft:stone", count: 8, max_stack: 64, damage: 0, max_damage: 0 };
         let lines = extra_lines(&s, &item);
         assert_eq!(lines.len(), 2); // id + stack
         assert!(lines.iter().all(|l| !l.text.contains("Durability")));
