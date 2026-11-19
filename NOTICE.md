@@ -12,6 +12,12 @@
 Each port is a subset: the core chat behavior was transplanted; GUI config screens
 and Fabric API dependencies were not. Details are in each project's NOTICE.md.
 
+## Original mods
+
+Six mods are original to this project (`mods/ports/`): Coordinates HUD, Durability
+HUD, Auto Reconnect, Chat Highlight, FPS HUD and Item Tooltip+. They are MIT,
+copyright (c) 2026 Jorungandr — see the top-level `LICENSE`.
+
 ## Horizon
 
 The compiled client in the release binary is built from the Horizon project,

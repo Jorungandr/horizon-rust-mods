@@ -25,12 +25,18 @@ MODS = {
     "coords": ROOT / "ports/coords.rs",
     "durability": ROOT / "ports/durability.rs",
     "autoreconnect": ROOT / "ports/autoreconnect.rs",
+    "chathighlight": ROOT / "ports/chat_highlight.rs",
+    "fpshud": ROOT / "ports/fps_hud.rs",
+    "itemtooltip": ROOT / "ports/item_tooltip.rs",
 }
 
-# The four ports with a settings page of their own.
-SETTINGS_PORTS = ("chattimestamps", "coords", "durability", "autoreconnect")
-# The two overlay ports that draw into the HUD.
-HUD_PORTS = ("coords", "durability")
+# The ports with a settings page of their own.
+SETTINGS_PORTS = (
+    "chattimestamps", "coords", "durability", "autoreconnect",
+    "chathighlight", "fpshud", "itemtooltip",
+)
+# The overlay ports that draw into the HUD.
+HUD_PORTS = ("coords", "durability", "fpshud")
 
 KEEP = "--keep-target" in sys.argv
 if "--no-copy" not in sys.argv:
@@ -532,6 +538,172 @@ pub fn settings_click(game: &mut {GAME}<'_>, mod_id: &str, button: usize) {{
     }}
 }}
 ''',
+    "chathighlight": f'''
+
+fn read_settings(game: &{GAME}<'_>) -> Settings {{
+    Settings::from_lookup(|key| game.native_setting(ID, key))
+}}
+
+/// Rebuild each span, recolouring the parts that match a keyword. As with
+/// the other chat ports, spans must be rebuilt (`Text::styled`) rather than
+/// edited in place so `Text`'s private `source` stays in sync.
+pub fn apply(game: &{GAME}<'_>, message: &mut {TEXT}) {{
+    use horizon_client::text::named_color;
+
+    let settings = read_settings(game);
+    if !settings.enable_mod {{
+        return;
+    }}
+    let words = keywords(&settings);
+    if words.is_empty() {{
+        return;
+    }}
+    let Some(color) = named_color(settings.color_name()) else {{
+        return;
+    }};
+    let mut rebuilt = {TEXT}::empty();
+    for span in &message.spans {{
+        let pieces = highlight(&span.text, &words, settings.match_case);
+        if pieces.iter().all(|p| !p.hit) {{
+            rebuilt.push({TEXT}::styled(span.text.clone(), span.style.clone()));
+            continue;
+        }}
+        for piece in pieces {{
+            if piece.hit {{
+                let mut style = span.style.clone();
+                style.color = Some(color);
+                rebuilt.push({TEXT}::styled(piece.text, style));
+            }} else {{
+                rebuilt.push({TEXT}::styled(piece.text, span.style.clone()));
+            }}
+        }}
+    }}
+    *message = rebuilt;
+}}
+
+pub fn settings_page(game: &{GAME}<'_>, mod_id: &str, buttons: &mut Vec<String>) {{
+    if mod_id != ID {{
+        return;
+    }}
+    buttons.extend(read_settings(game).labels());
+}}
+
+pub fn settings_click(game: &mut {GAME}<'_>, mod_id: &str, button: usize) {{
+    if mod_id != ID {{
+        return;
+    }}
+    let mut settings = read_settings(game);
+    settings.click(button);
+    for (key, value) in settings.stored() {{
+        game.native_set_setting(ID, key, &value);
+    }}
+}}
+''',
+    "fpshud": f'''
+
+fn read_settings(game: &{GAME}<'_>) -> Settings {{
+    Settings::from_lookup(|key| game.native_setting(ID, key))
+}}
+
+fn corner(placement: Placement) -> {CORNER} {{
+    match placement {{
+        Placement::TopLeft => {CORNER}::TopLeft,
+        Placement::TopRight => {CORNER}::TopRight,
+        Placement::BottomLeft => {CORNER}::BottomLeft,
+        Placement::BottomRight => {CORNER}::BottomRight,
+    }}
+}}
+
+/// Draw the readings in the chosen corner using the engine's own frame meter.
+pub fn hud(game: &{GAME}<'_>, batch: &mut {HUD}, corners: &mut {CORNERS}) {{
+    let settings = read_settings(game);
+    if !settings.enable_mod {{
+        return;
+    }}
+    let readings = game.native_frame_rate();
+    let rows = lines(&settings, readings);
+    const LINE: f32 = 10.0;
+    const PAD: f32 = 2.0;
+    let width = rows
+        .iter()
+        .map(|row| game.native_text_width(row))
+        .fold(0.0f32, f32::max)
+        + PAD * 2.0;
+    let height = rows.len() as f32 * LINE + PAD * 2.0;
+    let (x, y) = corners.place(corner(settings.placement), width, height);
+    game.native_fill(batch, [x, y, width, height], 0x78000000);
+    for (i, row) in rows.iter().enumerate() {{
+        let color = if i == 0 {{ fps_color(readings.0) }} else {{ 0xFFFFFF }};
+        game.native_text(batch, row, [x + PAD, y + PAD + i as f32 * LINE], color, true);
+    }}
+}}
+
+pub fn settings_page(game: &{GAME}<'_>, mod_id: &str, buttons: &mut Vec<String>) {{
+    if mod_id != ID {{
+        return;
+    }}
+    buttons.extend(read_settings(game).labels());
+}}
+
+pub fn settings_click(game: &mut {GAME}<'_>, mod_id: &str, button: usize) {{
+    if mod_id != ID {{
+        return;
+    }}
+    let mut settings = read_settings(game);
+    settings.click(button);
+    for (key, value) in settings.stored() {{
+        game.native_set_setting(ID, key, &value);
+    }}
+}}
+''',
+    "itemtooltip": f'''
+
+fn read_settings(game: &{GAME}<'_>) -> Settings {{
+    Settings::from_lookup(|key| game.native_setting(ID, key))
+}}
+
+/// Append the extra lines to an item's tooltip.
+pub fn apply(
+    game: &{GAME}<'_>,
+    stack: &horizon_client::items::ItemStack,
+    lines: &mut Vec<({TEXT}, u32)>,
+) {{
+    let settings = read_settings(game);
+    if !settings.enable_mod {{
+        return;
+    }}
+    let Some(info) = game.res.items().items.get(&stack.item) else {{
+        return;
+    }};
+    let data = ItemData {{
+        id: &stack.item,
+        count: stack.count,
+        damage: stack.damage,
+        max_damage: info.max_damage,
+    }};
+    for line in extra_lines(&settings, &data) {{
+        lines.push(({TEXT}::literal(line.text), line.color));
+    }}
+}}
+
+pub fn settings_page(game: &{GAME}<'_>, mod_id: &str, buttons: &mut Vec<String>) {{
+    if mod_id != ID {{
+        return;
+    }}
+    buttons.extend(read_settings(game).labels());
+}}
+
+pub fn settings_click(game: &mut {GAME}<'_>, mod_id: &str, button: usize) {{
+    if mod_id != ID {{
+        return;
+    }}
+    let mut settings = read_settings(game);
+    settings.click(button);
+    for (key, value) in settings.stored() {{
+        game.native_set_setting(ID, key, &value);
+    }}
+}}
+''',
 }
 
 for name, path in MODS.items():
@@ -557,6 +729,7 @@ chat_call = '''if !overlay {
             ports_whenchat::apply(&mut *self, system, overlay, message);
             ports_chattimestamps::apply(&mut *self, message);
             ports_timeformatter::apply(message);
+            ports_chathighlight::apply(&*self, message);
         }
         '''
 anchor = "mod_api::dispatch_client_chat_received("
@@ -571,6 +744,9 @@ for name, title, desc in (
     ("coords", "Coordinates HUD 0.1.0", "Shows your position, facing and dimension in a screen corner."),
     ("durability", "Durability HUD 0.1.0", "Shows how much durability your armour and held items have left."),
     ("autoreconnect", "Auto Reconnect 0.1.0", "Rejoins the last server after the connection is lost."),
+    ("chathighlight", "Chat Highlight 0.1.0", "Colours configured keywords in incoming chat."),
+    ("fpshud", "FPS HUD 0.1.0", "Shows frames per second, slowest frame and 1% low."),
+    ("itemtooltip", "Item Tooltip+ 0.1.0", "Adds item id, durability and stack size to tooltips."),
 ):
     rows += (
         f'        mods.push(NativeMod {{\n'
@@ -604,6 +780,14 @@ hud_calls = "".join(f"        ports_{n}::hud(&*self, batch, corners);\n" for n i
 anchor = "mod_api::dispatch_hud(self, mod_api::mods(), batch, corners);"
 assert text.count(anchor) == 1
 text = text.replace(anchor, hud_calls + "        " + anchor)
+
+# Item Tooltip+: append our lines to the tooltip before the registered mods
+# get it, so ours sit after the vanilla lines.
+tooltip_call = """        ports_itemtooltip::apply(self, stack, lines);
+        """
+anchor = "mod_api::dispatch_tooltip(self, mod_api::mods(), stack, lines);"
+assert text.count(anchor) == 1
+text = text.replace(anchor, tooltip_call + anchor)
 
 # Auto Reconnect: the countdown advances once a tick, and a completed join
 # resets the attempt budget.

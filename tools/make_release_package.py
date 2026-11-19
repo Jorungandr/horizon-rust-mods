@@ -12,7 +12,7 @@ import pathlib, zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
-OUT = DIST / "Horizon-Ports-Rust-6mods.zip"
+OUT = DIST / "Horizon-Ports-Rust-9mods.zip"
 RELEASE = ROOT / "release"
 GAME = ROOT / "build-win" / "game-port"
 BUILD = ROOT / "build-win"
@@ -43,6 +43,10 @@ EVIDENCE = [
     "chattimestamps-settings.png", "coords-settings.png", "durability-settings.png",
     "autoreconnect-settings.png", "verify-final-stdout.log",
     "verify-settings2-stdout.log", "verify-stdout.log", "verify-settings-stdout.log",
+    # Nine-mod batch evidence
+    "hud-coords-fps.png", "hud-durability-nine.png", "tooltip-inventory.png",
+    "mods-page-nine.png", "fpshud-settings.png", "itemtooltip-settings.png",
+    "chathighlight-settings.png", "verify-nine.log", "verify-new-settings.log",
 ]
 
 count = 0
