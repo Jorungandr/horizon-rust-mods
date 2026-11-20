@@ -20,7 +20,7 @@ Nine native Rust mods for [Horizon](https://playhorizon.dev) (Minecraft Java Edi
 | `ports/fps_hud.rs` | original | FPS / slowest frame / 1% low overlay, configurable corner |
 | `ports/item_tooltip.rs` | original | Appends item ID, durability and stack size to tooltips |
 
-Official-format projects: [`native/`](native/) contains `whenchat`, `chattimestamps`, `timeformatter`, `chathighlight`, `coords`, `fpshud`, `durability` and `itemtooltip`. `autoreconnect` is only in the injected package because the official `Host` API has no connect-to-server method.
+Official-format projects: [`native/`](native/) contains `whenchat`, `chattimestamps`, `timeformatter`, `chathighlight`, `coords`, `fpshud`, `durability` and `itemtooltip`. `autoreconnect` is only in the injected package because the official `Host` API has no connect-to-server method. See [`docs/NEW-FORMAT.md`](docs/NEW-FORMAT.md) for the launcher install flow, the official registry publishing steps and the porting limitation.
 
 In-game verification (screenshots in [`evidence/`](evidence/)):
 
