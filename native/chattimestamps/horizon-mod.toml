@@ -1,8 +1,8 @@
 id = "chattimestamps"
 name = "Chat Timestamps"
 version = "0.2.0"
-description = "Customizable chat timestamps: time/date formatting, colours and hover mode."
-authors = ["Jorungandr"]
+description = "Customizable chat timestamps: time/date formatting, colours and hover mode. Port of PlagueTR/ChatTimestamps (MIT)."
+authors = ["PlagueTR", "Jorungandr"]
 license = "MIT"
 api = "0.2"
 side = "client"

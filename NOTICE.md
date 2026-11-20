@@ -2,12 +2,15 @@
 
 ## Ported mods
 
-- **WhenChat** — Copyright (c) ErikEdits. MIT license. Source: https://github.com/ErikEdits/WhenChat
-  Ported to Rust in `mods/whenchat-horizon/`; original copyright and license retained there.
-- **Plague's Chat Timestamps** — Copyright (c) PlagueTR. MIT license. Source: https://github.com/PlagueTR/ChatTimestamps
-  Ported to Rust in `mods/chattimestamps-horizon/`; original copyright and license retained there.
+- **WhenChat** — Copyright (c) 2026 ErikEdits. MIT license. Source: https://github.com/ErikEdits/WhenChat
+  Ported to Rust in `mods/whenchat-horizon/` and `native/whenchat/`; the original copyright and
+  MIT license text are retained verbatim in both, with the Rust port credited alongside.
+- **Plague's Chat Timestamps** — Copyright (c) 2023 PlagueTR. MIT license. Source: https://github.com/PlagueTR/ChatTimestamps
+  Ported to Rust in `mods/chattimestamps-horizon/` and `native/chattimestamps/`; the original
+  copyright and MIT license text are retained verbatim in both, with the Rust port credited alongside.
 - **Time Formatter** — Copyright (c) 2025 M3z0id. MIT license. Source: https://github.com/m3z0id/TimeFormatter
-  Ported to Rust in `mods/timeformatter-horizon/`; original copyright and license retained there.
+  Ported to Rust in `mods/timeformatter-horizon/` and `native/timeformatter/`; the original
+  copyright and MIT license text are retained verbatim in both, with the Rust port credited alongside.
 
 Each port is a subset: the core chat behavior was transplanted; GUI config screens
 and Fabric API dependencies were not. Details are in each project's NOTICE.md.

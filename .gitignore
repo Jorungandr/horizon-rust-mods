@@ -23,3 +23,7 @@ game/
 *.swp
 Thumbs.db
 desktop.ini
+
+# SDK cache staged by the mod toolchain
+.horizon/
+**/.horizon/

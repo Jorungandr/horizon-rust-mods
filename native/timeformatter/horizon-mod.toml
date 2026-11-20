@@ -1,8 +1,8 @@
 id = "timeformatter"
 name = "Time Formatter"
 version = "0.2.0"
-description = "Formats Discord-style <t:...> timestamps in chat into your local time."
-authors = ["Jorungandr"]
+description = "Formats Discord-style <t:...> timestamps in chat into your local time. Port of M3z0id/TimeFormatter (MIT)."
+authors = ["M3z0id", "Jorungandr"]
 license = "MIT"
 api = "0.2"
 side = "client"
