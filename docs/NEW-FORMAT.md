@@ -65,32 +65,43 @@ all of them into one build. Set `HORIZON_SDK_BASE` to a mirror root if you mirro
 ## Publish to the official registry (for authors)
 
 The registry is the `horizon-rust/horizon-mods` GitHub repository; the launcher and the
-website read its generated `index.json` (schema 1). A submission is a pull request there,
-or the web form at `playhorizon.dev/mods/submit` (GitHub sign-in). Two cases matter:
+website read its generated `index.json` (schema 1). The current submission path is a
+**pull request** that adds `mods/<id>.toml` (the web form is legacy and cannot take
+current packages).
 
-### Repository-linked project (recommended here)
+### Submit one project by pull request
 
-1. Push the mod source to a **public** GitHub repository — done:
-   `Jorungandr/horizon-rust-mods`.
-2. Put a `horizon-registry.toml` at the repository root in the newest release tag, with
-   only these keys: `name`, `summary`, `description`, `authors`, `license`. Other keys are
-   refused; any field left out is filled from the registry entry.
-3. Submit the project with its `repo` (the submit service checks the repo is public and
-   opens a PR adding `mods/<id>.toml`). A reviewer reads the repository once.
-4. Publish versions as **GitHub releases in this repository**. Repository-linked projects
-   take no version uploads through the form: their versions are the repo's releases, read
-   and validated by that repo's CI with no PR. Creating the release is all that is needed.
-5. Each version file is a `.hmod` (a zip of `horizon-mod.toml`, `Cargo.toml`, `src/` and
-   the checked root Cargo project). Pin it by SHA-256. If the project sets a minisign
-   `key`, every version must be signed with it; updates signed with another key are refused.
+1. Attach the `.hmod` to a **GitHub release of your own repository** (here:
+   `Jorungandr/horizon-rust-mods`, tag `v0.2.0-native`), under the exact file name the
+   entry uses, e.g. `whenchat-0.2.0.hmod`.
+2. Open a PR against `horizon-rust/horizon-mods` that adds `mods/<id>.toml` with a
+   `[[versions]]` record: `version`, `file`, `sha256` (`sha256sum <file>`), `game`,
+   `published`, and the icon path `icons/<id>.png`. Link each release file in the PR
+   description.
+3. CI `stage` downloads each linked file, checks its name and SHA-256 against the new
+   record, and runs the checker; it takes **at most 3 new files per run** (more must be
+   staged by a maintainer), so submit in batches of three.
+4. `check` verifies structure, hashes and the built index, then a reviewer reads the
+   entry and, for a native mod, the source. Merging publishes it.
 
-### File-based project (no `repo`)
+Each `.hmod` is a flat zip of `horizon-mod.toml`, `Cargo.toml`, `Cargo.lock`, `src/`
+(plus `LICENSE`/`NOTICE`, which the packer keeps). Build it with the official tool so the
+layout and `uses.json` are exactly what the registry expects:
 
-Submit the `entry` plus the `.hmod` file through the form. The service inspects it
-(`horizon_mod_package::index::inspect`: signature, hash, entry fields), uploads it to the
-`staging` release as `<sha256>.<extension>` and opens or updates the entry PR. Owners
-listed in the entry can later publish updates without a reviewer (an `owner-update` PR
-verified by the registry secret).
+```
+cargo horizon-mod build                                  # -> target/horizon-mod/<id>.hmod
+cargo horizon-mod check target/horizon-mod/<id>.hmod      # package check
+cargo horizon-mod registry check <base> <head> --files <dir>   # the registry's own check
+cargo horizon-mod registry review <base> <head> --author <login>
+```
+
+### Ports: what the policy requires
+
+For a port of another mod the policy asks that the original's licence allows it, that the
+original's **copyright and licence notices are kept**, and that the original is credited
+and linked. Here each port package carries `LICENSE` with the upstream copyright line
+first (e.g. `Copyright (c) 2026 ErikEdits`) and the port credited below, a `NOTICE.md`
+naming the upstream author/year/repo, and the entry's `authors` lists the upstream author.
 
 ### Page requirements
 
@@ -124,3 +135,23 @@ All eight `native/` projects pass their Rust unit tests offline, compile togethe
 `horizon-launcher native-build` (`left_out: []`, none skipped), and were loaded in a real
 game. In-game checks covered the chat timestamp/format/highlight pipeline (including
 `Translatable` chat arguments), the coords/fps/durability HUDs and item tooltips.
+
+## Registry submission status (0.2.0)
+
+Six of the mods are submitted to `horizon-rust/horizon-mods`, in two pull requests of
+three files each (the CI limit), with the `.hmod` files attached to release
+[`v0.2.0-native`](https://github.com/Jorungandr/horizon-rust-mods/releases/tag/v0.2.0-native):
+
+- [#1459](https://github.com/horizon-rust/horizon-mods/pull/1459) — `chathighlight`,
+  `durability`, `itemtooltip` (original mods)
+- [#1460](https://github.com/horizon-rust/horizon-mods/pull/1460) — `whenchat`,
+  `chattimestamps`, `timeformatter` (MIT ports, upstream copyright kept)
+
+Both passed CI `fetch`/`stage` and the local `cargo horizon-mod registry check` and
+`registry review` (7 packages, all `native-mod`, `left_out: []`). The `check` workflow on
+each PR waits for a maintainer to approve a first-time contributor's run.
+
+`fpshud` is intentionally **not** submitted: the official FPS Counter is now a WebAssembly
+mod, installable with no build, so ours would duplicate it. `coords` is held back too: the
+official Coordinates HUD is being redone (issue #1214) and an entry there would compete
+with that work, though our implementation shares no code with it.
