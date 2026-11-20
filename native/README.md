@@ -1,6 +1,6 @@
 # Official-format native mods (recommended)
 
-These eight projects use Horizon's **official native-mod SDK** (`api = "0.2"`). They are
+These ten projects use Horizon's **official native-mod SDK** (`api = "0.2"`). They are
 source packages: the Horizon launcher compiles them on your machine against the exact
 Horizon build you play, then loads the resulting `mod_*.dll` files. The game itself is
 never rebuilt or replaced.
@@ -21,6 +21,8 @@ README; that older distribution is kept only for reference.
 | `fpshud` | FPS HUD | FPS / frame time overlay; four corner placements |
 | `durability` | Durability HUD | Damaged gear and held tools, colour thresholds, right-aligned panel |
 | `itemtooltip` | Item Tooltip+ | Adds item id, durability and stack size to tooltips |
+| `appleskin` | AppleSkin | Saturation in gold over the hunger bar, `Hunger +N` / `Saturation +N.N` in food tooltips |
+| `dynamicfps` | Dynamic FPS | 10 FPS in the background, 1 FPS minimised; never raises a lower cap |
 
 `autoreconnect` is **not** in this set: the official `Host` API has `disconnect` but no
 method to connect to a server, so the Java port cannot be reproduced faithfully.

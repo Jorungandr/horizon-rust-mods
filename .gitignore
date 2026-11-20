@@ -27,3 +27,6 @@ desktop.ini
 # SDK cache staged by the mod toolchain
 .horizon/
 **/.horizon/
+
+# Scratch download/test data
+.tmpdata/

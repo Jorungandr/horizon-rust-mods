@@ -1,0 +1,8 @@
+[package]
+name = "mod-appleskin"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+horizon-mod-api = { path = ".horizon/sdk/api/crates/horizon-mod-api" }
+horizon-core = { path = ".horizon/sdk/api/crates/horizon-core" }
