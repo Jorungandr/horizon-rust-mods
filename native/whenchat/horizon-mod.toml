@@ -1,0 +1,14 @@
+id = "whenchat"
+name = "WhenChat"
+version = "0.2.0"
+description = "Prepends [HH:MM:SS] (local time) to every incoming chat message. Port of ErikEdits/WhenChat (MIT)."
+authors = ["Jorungandr"]
+license = "MIT"
+api = "0.2"
+side = "client"
+capabilities = ["registries"]
+
+[native]
+game = "26.3"
+horizon = "dd67b76ff23e28c6d8e21859df600d31572f81a0"
+mixins = "e59da9094f0c2fdda6c627fe9eff22dec6a906f0"
