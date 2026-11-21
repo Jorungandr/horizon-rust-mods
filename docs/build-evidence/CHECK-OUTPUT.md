@@ -94,7 +94,10 @@ timeformatter 0.2.0 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c
 
 All ten mods were also compiled by the Horizon launcher itself (native build,
 `--trust-native-code`), which compiles every native source mod against the
-prebuilt game rather than only packing it:
+prebuilt game rather than only packing it. This log was recorded for the
+ten-mod bundle before the client-stall fixes below; the three packages rebuilt
+afterwards are compiled against the same pinned SDK in
+[Pinned-SDK compile of the rebuilt packages](#pinned-sdk-compile-of-the-rebuilt-packages).
 
 ```text
 Checking 10 mods
@@ -131,3 +134,44 @@ dynamicfps 0.2.1 (native-mod, format native-1/5ef7734.../e59da90..., for 26.3)
 
 The 0.2.0 release asset was restored to its published `ff368963…` bytes; 0.2.1 is a
 separate asset. Launcher build of all ten mods is recorded above.
+
+## Pinned-SDK compile of the rebuilt packages
+
+The three packages rebuilt after the reviews (`chathighlight-0.2.0.hmod`,
+`timeformatter-0.2.0.hmod`, `dynamicfps-0.2.1.hmod`) come from the same source
+directories the launcher build compiles, and the archives reproduce byte for byte
+from them. Each was recompiled against the SDK revision the launcher pins
+(`5ef7734f…`) and its unit tests were run, with the sources touched first so the
+compile is not a cache hit:
+
+```text
+$ cargo build --offline                  # native/chathighlight
+   Compiling mod-chathighlight v0.1.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.50s
+$ cargo test --offline
+running 10 tests
+test result: ok. 10 passed; 0 failed
+
+$ cargo build --offline                  # native/timeformatter
+   Compiling mod-timeformatter v0.1.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.84s
+$ cargo test --offline
+running 15 tests
+test result: ok. 15 passed; 0 failed
+
+$ cargo build --offline                  # native/dynamicfps
+   Compiling mod-dynamicfps v0.1.0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.22s
+$ cargo test --offline
+running 5 tests
+test result: ok. 5 passed; 0 failed
+```
+
+The regression tests added with the fixes are part of those runs: Chat Highlight
+keeps the inherited style only on the parent, Time Formatter matches word-form tags
+without decoding the rest of the line, and Dynamic FPS offers 1/5/10 FPS when
+minimised.
+
+The launcher build log above predates these fixes. Re-running it on the current
+sources needs the launcher closed, because it holds the instance lock while open;
+that log will be added here once captured.
