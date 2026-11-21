@@ -114,3 +114,20 @@ Compiling whenchat (10 of 10)
 Installing the build
 Your mods are built (took 51 s).
 ```
+
+## Dynamic FPS 0.2.1 (post-merge follow-up)
+
+Dynamic FPS was merged as 0.2.0 (`ff368963…`) before the review's 20 FPS point was fixed.
+Because a published file never changes, the fix is a new version. 0.2.1 removes the
+ineffective 20 FPS minimised option (Horizon already clamps a minimised window to 10 FPS
+before the hook) and documents the 1 FPS power-saving trade-off. Unit tests 5/5 pass.
+
+```text
+$ cargo horizon-mod check dynamicfps-0.2.1.hmod
+dynamicfps 0.2.1 (native-mod, format native-1/5ef7734.../e59da90..., for 26.3)
+  8432 bytes, SHA-256 31d4e99f35b1644740d2caf75a7864b917d4a52863b7d908a3c9351a82ce4e7b, unsigned
+  native source: unsandboxed; not executed by the registry check. Compile and test against the exact pinned Horizon and Mixins revisions before review.
+```
+
+The 0.2.0 release asset was restored to its published `ff368963…` bytes; 0.2.1 is a
+separate asset. Launcher build of all ten mods is recorded above.
