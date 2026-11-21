@@ -63,16 +63,41 @@ window itself (not the desktop), so the FPS numbers are the client's own overlay
 | --- | --- | --- |
 | AppleSkin, in game | gold pixel-art overlay on the right-hand hunger icons | `appleskin-playing.png`, `appleskin-hud-full-hunger.png` |
 | AppleSkin, paused | overlay gone, only the pause blur remains on the icons | `appleskin-paused-hidden.png` |
+| AppleSkin, food tooltip | cooked porkchop shows `恢复饥饿 +8` / `饱和度 +13.8` | `food-tooltip-values.png` |
 | Dynamic FPS, focused | `115 FPS / Frame 11 ms` | `dynamicfps-foreground.png` |
 | Dynamic FPS, background | `10 FPS / Frame 96 ms` with the launcher focused and the game still visible | `dynamicfps-unfocused-10fps.png` |
 | Dynamic FPS, restored from minimised | first frame after restore reads `0 FPS / Frame 93 ms` while the counter climbs back, i.e. it was at the 1 FPS cap | `dynamicfps-restored-from-minimized.png` |
 | Chat timestamps | two stamps per line, own messages included — expected while both chat mods are installed | `chat-timestamps-duplicated.png` |
-| Time Formatter | `:t` → `06:13`, `:f` → `November 15, 2023 at 06:13`, `:R` → `3 years, 6 days, 11 hours… ago`; `<t:abc>` and an out-of-range stamp stay literal; CJK before/after the tag is kept | `chat-timeformatter-tags.png` |
+| Time Formatter | `:t` → `06:13`, `:f` → `November 15, 2023 at 06:13`, `:R` → `3 years, 6 days, 11 hours… ago`; `<t:abc>` and an out-of-range stamp stay literal; CJK before/after the tag is kept; `<<t:…>` stays literal | `chat-timeformatter-tags.png`, `timeformatter-double-bracket-escape.png` |
 | Chat Highlight | explicit colours kept (`A1` green bold, `A2` red italic, `A3` blue); the keyword is recoloured gold and the rest of the line keeps the styling it inherits from the message itself, identical to the same message without a keyword | `chat-highlight-style-preserved.png` |
 
 Escape syntax is a doubled angle bracket (`<<t:…>` renders the tag literally); a
 backslash is not special and stays as a literal character. Epoch
 `1700000000` is formatted in the machine's local zone (UTC+8), hence `06:13`.
+
+## Fixes from the user's screenshots (2026-11-21)
+
+Two real defects showed up in the player's own screenshots:
+
+1. **Durability HUD** printed hard-coded English (`Helmet Copper Helmet 43%`)
+   even on a Chinese client. v0.2.1 resolves the item name with
+   `host.translate("item.<id>")` / `block.<id>` and falls back to a short slot
+   label, so the same row reads `铜头盔 43%`.
+2. **Item Tooltip+** appended its lines with the RGB palette value as the
+   trailing RGBA alpha. `GRAY` (`0x808080`) was therefore invisible and green
+   was one-third opaque, which is why the player's screenshot of a cobblestone
+   showed only its name (`item-tooltip-missing-lines.png`). v0.2.1 keeps the
+   colour on the `Text` and pushes the line with full alpha.
+
+Both are published as `v0.2.1-native` and the registry branch `add-native-mods-0.2.0`
+points at the new hashes; the 0.2.0 assets are untouched. Their screenshots
+will need to be retaken after the local instance is rebuilt with 0.2.1.
+
+Two observations still need a sharper capture: the action-bar text itself
+(`/title @a actionbar …`) lasts only a couple of seconds — the current
+`actionbar-command-feedback.png` caught the command's chat reply, not the bar —
+and `paused-fps-readout.png` is the pause menu (`10 FPS`), not a true minimised
+window. Neither changes the code; both are evidence gaps only.
 
 ## What is already attached to the PRs
 
