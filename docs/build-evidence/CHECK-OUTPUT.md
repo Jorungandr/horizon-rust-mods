@@ -44,3 +44,51 @@ dynamicfps 0.2.0 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988
   native source: unsandboxed; not executed by the registry check. Compile and test against the exact pinned Horizon and Mixins revisions before review.
 
 ```
+
+## Rebuild after registry review (three packages)
+
+AppleSkin, Dynamic FPS and Chat Timestamps were rebuilt after review. Each
+package below was produced with `cargo-horizon-mod build` from the exact pinned
+SDK (`5ef7734fdd854add5efd6817178be3c988d8d050`) and re-checked:
+
+```text
+$ cargo horizon-mod check appleskin_hzn-0.2.0.hmod
+appleskin_hzn 0.2.0 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  12351 bytes, SHA-256 e3d367acdd4de948dad3385b781d7c284d8a6989edd42a32be1dab22643b3c62, unsigned
+  native source: unsandboxed; not executed by the registry check. Compile and test against the exact pinned Horizon and Mixins revisions before review.
+
+$ cargo horizon-mod check dynamicfps-0.2.0.hmod
+dynamicfps 0.2.0 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  8432 bytes, SHA-256 14f2bd0c210fd9903435d86341a213352034e401a6a20d86768a799599d24806, unsigned
+  native source: unsandboxed; not executed by the registry check. Compile and test against the exact pinned Horizon and Mixins revisions before review.
+
+$ cargo horizon-mod check chattimestamps-0.2.0.hmod
+chattimestamps 0.2.0 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  12682 bytes, SHA-256 8941f9b1c78d500ab1580740e8635607c27b77727d1f16147ec88c676467945f, unsigned
+  native source: unsandboxed; not executed by the registry check. Compile and test against the exact pinned Horizon and Mixins revisions before review.
+```
+
+### Launcher build
+
+All ten mods were also compiled by the Horizon launcher itself (native build,
+`--trust-native-code`), which compiles every native source mod against the
+prebuilt game rather than only packing it:
+
+```text
+Checking 10 mods
+Using the mod tools for the Nov 18 update kept from an earlier build
+Prebuilt game: only the mods compile (optimized)
+Compiling the mods against the prebuilt game
+Compiling appleskin (1 of 10)
+Compiling chathighlight (2 of 10)
+Compiling chattimestamps (3 of 10)
+Compiling coords (4 of 10)
+Compiling durability (5 of 10)
+Compiling dynamicfps (6 of 10)
+Compiling fpshud (7 of 10)
+Compiling itemtooltip (8 of 10)
+Compiling timeformatter (9 of 10)
+Compiling whenchat (10 of 10)
+Installing the build
+Your mods are built (took 51 s).
+```
