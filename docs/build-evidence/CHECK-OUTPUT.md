@@ -68,6 +68,28 @@ chattimestamps 0.2.0 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3
   native source: unsandboxed; not executed by the registry check. Compile and test against the exact pinned Horizon and Mixins revisions before review.
 ```
 
+## Rebuild after the second review (client-stall fixes)
+
+The review also asked for two quadratic client-stall paths to be removed:
+Chat Highlight cloned the full inherited `TextStyle` (including hover/click/item
+data) onto every keyword fragment, and Time Formatter decoded the whole rest of
+the line as UTF-8 for every `<t:` candidate. Both were fixed in source, unit
+tested (Chat Highlight 10/10, Time Formatter 15/15), rebuilt with the same pinned
+SDK and re-checked. Neither change adds or removes SDK API uses, so `uses.json`
+is byte-identical to the previously reviewed package for both mods.
+
+```text
+$ cargo horizon-mod check chathighlight-0.2.0.hmod
+chathighlight 0.2.0 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  10890 bytes, SHA-256 6c12c88ccbd293307cf17c4318f09a7d7315dff3ef82d7bbae9ad002b57690f7, unsigned
+  native source: unsandboxed; not executed by the registry check. Compile and test against the exact pinned Horizon and Mixins revisions before review.
+
+$ cargo horizon-mod check timeformatter-0.2.0.hmod
+timeformatter 0.2.0 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  13581 bytes, SHA-256 ee97ffc6d8ae8f3445f37ae2ac5017244ba8623b7cdd5f250c6138de28a71501, unsigned
+  native source: unsandboxed; not executed by the registry check. Compile and test against the exact pinned Horizon and Mixins revisions before review.
+```
+
 ### Launcher build
 
 All ten mods were also compiled by the Horizon launcher itself (native build,

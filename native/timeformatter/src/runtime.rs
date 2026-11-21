@@ -35,12 +35,15 @@ fn parse_payload(bytes: &[u8], content_start: usize) -> Option<(usize, String, u
         }
         std::str::from_utf8(&bytes[token_start..i]).ok()?.to_owned()
     } else {
-        let rest = std::str::from_utf8(&bytes[i..]).ok()?;
+        // Match the word forms as byte prefixes. Decoding the entire remaining
+        // tail with from_utf8 for every `<t:` candidate makes a long chat line
+        // quadratic; the keywords are ASCII, so a byte-prefix check is enough
+        // and keeps the scan linear in the message length.
         let word = ["yesterday", "tomorrow", "now"]
             .into_iter()
-            .find(|w| rest.starts_with(w))?;
+            .find(|w| bytes[i..].starts_with(w.as_bytes()))?;
         i += word.len();
-        word.to_owned()
+        (*word).to_owned()
     };
 
     let mut style = b'f';
@@ -261,6 +264,18 @@ mod tests {
         assert_eq!(resolve_seconds("now", NOW), Some(NOW));
         assert_eq!(resolve_seconds("yesterday", NOW), Some(NOW - 86_400));
         assert_eq!(resolve_seconds("tomorrow", NOW), Some(NOW + 86_400));
+    }
+
+    #[test]
+    fn word_tags_parse_as_byte_prefixes() {
+        // Word forms are matched on ASCII bytes, so a non-ASCII tail after the
+        // keyword must not change the result and must not trigger a full decode.
+        assert_eq!(find_tag("<t:tomorrow:t> 中文", 0).unwrap().raw, "tomorrow");
+        assert_eq!(find_tag("<t:now:t>©", 0).unwrap().raw, "now");
+        assert_eq!(find_tag("<t:yesterday>", 0).unwrap().raw, "yesterday");
+        // A prefix that merely starts with a keyword but continues with letters
+        // is rejected by the closing-bracket check, as before.
+        assert!(find_tag("<t:nowhere>", 0).is_none());
     }
 
     #[test]

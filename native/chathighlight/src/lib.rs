@@ -32,12 +32,15 @@ fn recolor(node: Text, words: &[String], match_case: bool, color: &str) -> Text 
                 return node;
             }
 
-            let base_style = node.style.clone();
+            // Keep the incoming style once on the parent and give each fragment
+            // only its colour override. TextStyle fields inherit from the
+            // enclosing component, so cloning the full style onto every match
+            // would duplicate hover/click (and item) data copied from a server
+            // chat line, which a crafted message could amplify to stall clients.
             let children = std::mem::take(&mut node.children);
             let mut parts = Vec::with_capacity(pieces.len());
             for piece in pieces {
                 let mut part = Text::literal(piece.text);
-                part.style = base_style.clone();
                 if piece.hit {
                     part.style.color = Some(color.to_owned());
                 }
@@ -46,9 +49,10 @@ fn recolor(node: Text, words: &[String], match_case: bool, color: &str) -> Text 
             if let Some(last) = parts.last_mut() {
                 last.children = children;
             }
-            let mut root = Text::literal("");
-            root.children = parts;
-            root
+            // `node.content` is already an empty literal from the replace above;
+            // reusing `node` preserves its original style and metadata.
+            node.children = parts;
+            node
         }
         TextContent::Translatable {
             key,
@@ -189,5 +193,33 @@ mod tests {
         assert_eq!(pieces.len(), 2);
         assert_eq!(pieces[0].style.color, None);
         assert_eq!(pieces[1].style.color.as_deref(), Some("gold"));
+    }
+
+    #[test]
+    fn recolor_keeps_parent_style_without_cloning_onto_fragments() {
+        // A style inherited from the server must live once on the parent, not
+        // be deep-copied into every fragment (which can amplify hover/item data
+        // on a crafted line). Colour is the only per-match override. Children
+        // inherit the parent's colour unless they set their own.
+        let mut original = Text::literal("meet SERVER and SERVER");
+        original.style.color = Some("gray".to_owned());
+        let words = vec!["server".to_owned()];
+        let out = recolor(original, &words, false, "gold");
+
+        // The parent keeps the incoming style; it is not moved onto fragments.
+        assert_eq!(out.style.color.as_deref(), Some("gray"));
+
+        let hits: Vec<_> = out
+            .children
+            .iter()
+            .filter(|part| part.style.color.as_deref() == Some("gold"))
+            .collect();
+        assert_eq!(hits.len(), 2, "both keyword matches should be coloured");
+        let plain: Vec<_> = out
+            .children
+            .iter()
+            .filter(|part| part.style.color.is_none())
+            .collect();
+        assert_eq!(plain.len(), 2, "unmatched fragments keep an empty style and inherit gray");
     }
 }
