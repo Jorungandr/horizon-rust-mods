@@ -1,5 +1,5 @@
-id = "appleskin"
-name = "AppleSkin"
+id = "appleskin_hzn"
+name = "AppleSkin (Horizon)"
 version = "0.2.0"
 description = "Shows the saturation hidden behind your hunger bar, and what a food item will restore."
 authors = ["Jorungandr"]

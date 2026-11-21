@@ -2,8 +2,11 @@
 
 /// Frame rates a window in the background may be held to.
 pub const UNFOCUSED: [i32; 6] = [1, 5, 10, 15, 20, 30];
-/// Frame rates a minimised window may be held to.
-pub const MINIMIZED: [i32; 4] = [1, 5, 10, 20];
+/// Frame rates a minimised window may be held to. Horizon already caps a
+/// minimised window at 10 FPS before this hook runs, and the cap we report is
+/// clamped to the game's own, so anything above 10 would be ineffective. Only
+/// values at or below 10 are offered.
+pub const MINIMIZED: [i32; 3] = [1, 5, 10];
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Caps {

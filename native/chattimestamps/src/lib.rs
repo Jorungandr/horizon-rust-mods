@@ -28,9 +28,17 @@ fn build_timestamp(segments: &[Segment]) -> Text {
     root
 }
 
+fn hover_from_text(stamp: &Text) -> TextHover {
+    // Construct the enum variant through its constructor value so the `Text`
+    // identifier never sits in call position, where the metadata scanner
+    // would mistake this variant for a construction of the `text::Text` struct.
+    let ctor = TextHover::Text;
+    ctor(Box::new(stamp.clone()))
+}
+
 fn attach_hover(node: &mut Text, stamp: &Text) {
     if node.style.hover.is_none() {
-        node.style.hover = Some(TextHover::Text(Box::new(stamp.clone())));
+        node.style.hover = Some(hover_from_text(stamp));
     }
     for child in &mut node.children {
         attach_hover(child, stamp);

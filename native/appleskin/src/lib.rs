@@ -2,17 +2,14 @@
 //! Native mod for the official Horizon SDK (api 0.2).
 mod logic;
 
-use logic::{halves_on, highlight, parse_food, tooltip_lines};
+use logic::{SATURATION, cell_color, icon_origin, parse_food, saturation_icons, tooltip_lines};
 use mod_api::{
-    ClientHost, GuiRenderPostEvent, Hooks, ItemTooltipEvent, Registrar, RegistrationContext,
-    SettingSpec, Text,
+    ClientHost, ComponentId, GuiRenderPostEvent, Hooks, ItemResource, ItemTooltipEvent, Registrar,
+    RegistrationContext, SettingSpec, Text,
 };
 
 #[derive(Default)]
 struct Mod;
-
-/// The gold AppleSkin uses for saturation.
-const SATURATION: u32 = 0xFFD9_A21B;
 
 #[mod_api::horizon_mod]
 impl Hooks for Mod {
@@ -31,7 +28,12 @@ impl Hooks for Mod {
     }
 
     fn gui_render_post(&self, host: &dyn ClientHost, event: &mut GuiRenderPostEvent<'_>) {
+        // While paused the world (and the real HUD) is blurred and dimmed, but
+        // this post-hook draws after that scrim, leaving the overlay alone and
+        // unnaturally crisp. Hide it entirely during pause so it obeys the same
+        // treatment as everything else.
         if event.gui_hidden
+            || host.is_paused()
             || !host.setting_bool("enable_mod").unwrap_or(true)
             || !host.setting_bool("show_saturation").unwrap_or(true)
         {
@@ -48,9 +50,18 @@ impl Hooks for Mod {
             return;
         };
         let [width, height] = event.batch.size();
-        for index in 0..10 {
-            if let Some(rect) = highlight(width, height, index, halves_on(food.saturation, index)) {
-                event.batch.fill(rect, SATURATION);
+
+        // Draw the original AppleSkin saturation icons pixel by pixel, in the
+        // same golden-brown palette the reference mod uses. Each icon is a
+        // 9x9 ASCII grid; '.' cells are transparent and skipped.
+        for (index, frame) in saturation_icons(food.saturation) {
+            let [ox, oy] = icon_origin(width, height, index);
+            for (row, line) in SATURATION[frame].iter().enumerate() {
+                for (col, ch) in line.bytes().enumerate() {
+                    if let Some(argb) = cell_color(ch) {
+                        event.batch.fill([ox + col as f32, oy + row as f32, 1.0, 1.0], argb);
+                    }
+                }
             }
         }
     }
@@ -61,7 +72,14 @@ impl Hooks for Mod {
         {
             return;
         }
-        let Some(tag) = host.item_default_component(event.stack.item(), "minecraft:food") else {
+        // Read the *effective* component of the actual stack, not the item's
+        // prototype default: a stack can override or remove `minecraft:food`,
+        // and that is the value the player is actually looking at.
+        let Some(food_id) = ComponentId::new("minecraft:food") else {
+            return;
+        };
+        let resource = ItemResource::of(event.stack);
+        let Some(tag) = resource.value(host, &food_id) else {
             return;
         };
         let Some(value) = parse_food(&tag) else {
@@ -70,7 +88,9 @@ impl Hooks for Mod {
         for (line, rgb) in tooltip_lines(value) {
             let mut text = Text::literal(line);
             text.style.color = Some(format!("#{:06X}", rgb & 0x00FF_FFFF));
-            event.lines.push((text, rgb));
+            // Trailing u32 is RGBA: a bare 0xRRGGBB has alpha 0 and hides the
+            // line. u32::MAX keeps the colour set on the Text above.
+            event.lines.push((text, u32::MAX));
         }
     }
 }
