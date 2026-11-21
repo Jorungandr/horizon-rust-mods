@@ -95,9 +95,9 @@ timeformatter 0.2.0 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c
 All ten mods were also compiled by the Horizon launcher itself (native build,
 `--trust-native-code`), which compiles every native source mod against the
 prebuilt game rather than only packing it. This log was recorded for the
-ten-mod bundle before the client-stall fixes below; the three packages rebuilt
-afterwards are compiled against the same pinned SDK in
-[Pinned-SDK compile of the rebuilt packages](#pinned-sdk-compile-of-the-rebuilt-packages).
+ten-mod bundle before the client-stall fixes below; the same ten mods were built
+again from the current sources against the Nov 19 update in
+[Launcher build against the Nov 19 update](#launcher-build-against-the-nov-19-update-all-ten-mods-after-the-fixes).
 
 ```text
 Checking 10 mods
@@ -172,6 +172,64 @@ keeps the inherited style only on the parent, Time Formatter matches word-form t
 without decoding the rest of the line, and Dynamic FPS offers 1/5/10 FPS when
 minimised.
 
-The launcher build log above predates these fixes. Re-running it on the current
-sources needs the launcher closed, because it holds the instance lock while open;
-that log will be added here once captured.
+The launcher build log above predates these fixes.
+
+## Launcher build against the Nov 19 update, all ten mods (after the fixes)
+
+The log below was recorded from the launcher's own native build on the current
+sources, against the pinned SDK revision `5ef7734f…` (the Nov 19 update) — the
+same sources the three rebuilt packages come from — and every one of the ten mods
+compiled. The launcher's download of the Nov 19 mod tools stalls on this network,
+so the pinned release was fetched once by hand, checked against its signed
+`SHA256SUMS`, and handed to the launcher through the offline base it documents
+for exactly this case (`HORIZON_SDK_BASE`, a folder holding `sdk-<build id>/`):
+
+```text
+$ horizon-launcher.exe native-build native/ --instance horizon \
+      --version nightly-2026-11-19-5ef7734 --trust-native-code
+Checking 10 mods
+Getting the mod tools for the Nov 19 update: 0 of 101 MB
+Getting the mod tools for the Nov 19 update: 100 of 101 MB
+Prebuilt game: only the mods compile (optimized)
+Compiling the mods against the prebuilt game
+Compiling appleskin_hzn (1 of 10)
+Compiling chathighlight (2 of 10)
+Compiling chattimestamps (3 of 10)
+Compiling coords (4 of 10)
+Compiling durability (5 of 10)
+Compiling dynamicfps (6 of 10)
+Compiling fpshud (7 of 10)
+Compiling itemtooltip (8 of 10)
+Compiling timeformatter (9 of 10)
+Compiling whenchat (10 of 10)
+Installing the build
+Your mods are built (took 78 s).
+```
+
+The launcher's own build log for the same run names the route and the stages, and
+the ten dynlibs it installed:
+
+```text
+Planning the build: 1627 ms
+Checking the prebuilt game: 11688 ms
+Native mods route: prebuilt-api.
+Mods compiled against the prebuilt game in 28.1 s
+Installing the build: 36779 ms
+Build completed.
+```
+
+Installed from that build (bytes, SHA-256 first four words), in the instance's
+native build `native-5ef7734-ef7a90e8e8c9`:
+
+```text
+mod_appleskin.dll        131603  940e9b7b 93f11985
+mod_chathighlight.dll    280228  254542a3 cee54f05
+mod_chattimestamps.dll   291737  8caa0183 915d3bcf
+mod_coords.dll           125005  b33b8881 e86cb8fc
+mod_durability.dll       238640  52c4288a 1ce04ac9
+mod_dynamicfps.dll       107271  c39ac571 c8148c60
+mod_fpshud.dll           115103  7f951f83 ca48c462
+mod_itemtooltip.dll      131742  7ff93c08 17fd63e5
+mod_timeformatter.dll    255786  cde02299 0d98fc22
+mod_whenchat.dll         107809  85ed1543 8ba4bc76
+```

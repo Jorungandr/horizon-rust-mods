@@ -123,6 +123,17 @@ mod tests {
     }
 
     #[test]
+    fn palette_is_rgb_so_the_line_alpha_must_be_set_at_push() {
+        // The event's trailing u32 is RGBA. These palette values are plain RGB,
+        // so their top byte is zero: passing one through as the line alpha makes
+        // the ID/stack lines invisible and the green line only 1/3 opaque.
+        assert_eq!(GRAY >> 24, 0);
+        assert_eq!(GREEN >> 24, 0);
+        assert_eq!(YELLOW >> 24, 0);
+        assert_eq!(RED >> 24, 0);
+    }
+
+    #[test]
     fn durability_color_by_threshold() {
         assert_eq!(durability_color(100, 100), GREEN);
         assert_eq!(durability_color(51, 100), GREEN);

@@ -35,8 +35,10 @@ want two prefixes; normally pick one (Chat Timestamps is configurable).
 1. Use a Horizon launcher that supports native mods (0.2.81 or newer).
 2. In **Mods**, add each project folder above (`horizon-mod.toml`, `Cargo.toml`, `src/`).
 3. Press **Play**. The launcher downloads/caches the pinned SDK, compiles the mods with
-   its own Rust toolchain and starts the game with them loaded. Mod settings are under
-   `Options > Mods` for mods that register them.
+   its own Rust toolchain and starts the game with them loaded. A mod that registers
+   settings reads them from its own data folder (`mods/.horizon-mod-data/<mod id>/`);
+   this Horizon build has no in-game page for them yet, so the registered defaults
+   apply. Distinct settings files can be written there to change one.
 4. You must own Minecraft Java Edition and import its 26.3 resources once; Horizon and
    this repository contain no Minecraft assets.
 

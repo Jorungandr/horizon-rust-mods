@@ -41,7 +41,11 @@ impl Hooks for Mod {
         for line in extra_lines(&settings, &data) {
             let mut text = Text::literal(line.text);
             text.style.color = Some(hex(line.color));
-            event.lines.push((text, line.color));
+            // The trailing u32 is RGBA, not RGB. Passing `line.color` straight
+            // through gives GRAY (0x808080) an alpha of zero and hides the ID
+            // and stack lines entirely; GREEN is only 1/3 opaque. The colour is
+            // already on the Text, so keep the trailing value fully opaque.
+            event.lines.push((text, u32::MAX));
         }
     }
 }

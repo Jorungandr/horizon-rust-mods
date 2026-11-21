@@ -1,6 +1,6 @@
 id = "itemtooltip"
 name = "Item Tooltip+"
-version = "0.2.0"
+version = "0.2.1"
 description = "Adds the item id, durability and stack size to item tooltips."
 authors = ["Jorungandr"]
 license = "MIT"

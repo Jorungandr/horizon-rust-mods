@@ -22,14 +22,15 @@ impl Slot {
         Self::MainHand,
         Self::OffHand,
     ];
+    /// Short Chinese slot label for the compact HUD row.
     pub fn name(self) -> &'static str {
         match self {
-            Self::Head => "Helmet",
-            Self::Chest => "Chestplate",
-            Self::Legs => "Leggings",
-            Self::Feet => "Boots",
-            Self::MainHand => "Main hand",
-            Self::OffHand => "Off hand",
+            Self::Head => "头盔",
+            Self::Chest => "胸甲",
+            Self::Legs => "护腿",
+            Self::Feet => "靴子",
+            Self::MainHand => "主手",
+            Self::OffHand => "副手",
         }
     }
 }
@@ -115,12 +116,14 @@ impl Bar {
             _ => 0xFF5555,
         }
     }
-    /// The single text row for this bar.
+    /// The single text row for this bar. `item` is the already-localised item
+    /// name (e.g. `铜头盔`), which itself says helmet/chestplate, so no extra
+    /// slot prefix is needed — keeping the row short.
     pub fn row(&self, show_percent: bool) -> String {
         if show_percent {
-            format!("{} {} {}", self.slot.name(), item_label(&self.item), self.label())
+            format!("{} {}", self.item, self.label())
         } else {
-            format!("{} {}", self.slot.name(), item_label(&self.item))
+            self.item.clone()
         }
     }
 }

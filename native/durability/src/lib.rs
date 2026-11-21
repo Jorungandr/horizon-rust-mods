@@ -81,7 +81,13 @@ impl Hooks for Mod {
         for slot in Slot::ALL {
             let Some(stack) = living.equipment(host, api_slot(slot)) else { continue; };
             let max = host.max_damage(stack.item()).unwrap_or(0);
-            let name = stack.item().id(host);
+            let id = stack.item().id(host);
+            // Prefer the game's localised item name (铜头盔, 石斧, ...), which is
+            // short and already names the piece. Fall back to the slot label.
+            let name = host
+                .translate(&format!("item.{}", id.replace(':', ".")))
+                .or_else(|| host.translate(&format!("block.{}", id.replace(':', "."))))
+                .unwrap_or_else(|| slot.name().to_owned());
             bars.push(Bar {
                 slot,
                 item: name,
