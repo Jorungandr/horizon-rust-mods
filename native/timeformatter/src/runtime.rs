@@ -64,11 +64,20 @@ fn find_tag(s: &str, from: usize) -> Option<Tag> {
     let bytes = s.as_bytes();
     let mut i = from;
     while i + 3 <= bytes.len() {
+        // `<<t:...>>` escapes a tag. Skip the whole escape so neither its
+        // inner `<t:...>` nor the extra `>` is treated as a real tag; other
+        // tags on the same line are still rewritten.
+        if bytes[i] == b'<'
+            && i + 4 <= bytes.len()
+            && &bytes[i..i + 4] == b"<<t:"
+            && let Some((end, _, _)) = parse_payload(bytes, i + 4)
+            && end + 1 < bytes.len()
+            && bytes[end + 1] == b'>'
+        {
+            i = end + 2;
+            continue;
+        }
         if bytes[i] == b'<' && i + 1 < bytes.len() && bytes[i + 1] == b't' && bytes[i + 2] == b':' {
-            if i > 0 && bytes[i - 1] == b'<' {
-                i += 3;
-                continue;
-            }
             if let Some((end, raw, style)) = parse_payload(bytes, i + 3) {
                 return Some(Tag {
                     start: i,
@@ -172,9 +181,6 @@ fn format_time(secs: i64, style: u8, now: &DateTime) -> Option<String> {
 }
 
 fn format_inner(input: &str, now_secs: i64, now: &DateTime) -> Option<String> {
-    if has_literal_escape(input) {
-        return None;
-    }
     let mut cursor = 0usize;
     let mut out = String::with_capacity(input.len());
     let mut changed = false;
@@ -283,6 +289,13 @@ mod tests {
         let input = "see <<t:1704067200:F>> here";
         assert!(has_literal_escape(input));
         assert_eq!(format_inner(input, NOW, &now()), None);
+    }
+
+    #[test]
+    fn literal_escape_does_not_block_other_tags_on_the_line() {
+        let input = "see <<t:1704067200:F>> and <t:1704067200:t>";
+        let out = format_inner(input, NOW, &now()).unwrap();
+        assert_eq!(out, "see <<t:1704067200:F>> and 00:00");
     }
 
     #[test]

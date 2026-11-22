@@ -5,7 +5,7 @@ An unofficial Rust port of **TimeFormatter** to the Horizon native mod API.
 - Original mod: https://github.com/m3z0id/TimeFormatter
 - Original author: M3z0id
 - Original license: MIT, Copyright (c) 2025 M3z0id (see `LICENSE`)
-- Port author: (unofficial port, 2026-11-17)
+- Port author: Jorungandr (unofficial port, 2026-11-17)
 - Port license: MIT (same terms; original copyright retained above)
 
 ## What was ported
@@ -34,8 +34,8 @@ The core client-side behaviour only:
 
 ## Verification
 
-- `runtime.rs` unit tests: 10/10 (tag parsing, all seven formats against fixed
-  UTC, special values, literal form, relative time).
+- library unit tests: 16/16 (tag parsing, all seven formats against fixed UTC,
+  special values, literal escapes, multiple tags, relative time).
 - `verify/` end-to-end against a stubbed Horizon API with the REAL injected
   files compiled in: 7/7 (chat replacement, literal form, overlay skip,
   child-component walk with style preservation, hover safety, list row).

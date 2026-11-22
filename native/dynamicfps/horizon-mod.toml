@@ -1,6 +1,6 @@
 id = "dynamicfps"
 name = "Dynamic FPS"
-version = "0.2.1"
+version = "0.2.2"
 description = "Drops the frame rate while the window is in the background, so Horizon stops burning power for a screen nobody is looking at."
 authors = ["Jorungandr"]
 license = "MIT"

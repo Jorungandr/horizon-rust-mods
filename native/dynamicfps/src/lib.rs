@@ -2,7 +2,7 @@
 //! Native mod for the official Horizon SDK (api 0.2).
 mod logic;
 
-use logic::{Caps, MINIMIZED, UNFOCUSED, limit_for, pick};
+use logic::{Caps, MINIMIZED, UNFOCUSED, limit_for, migrate_minimized_index, pick};
 use mod_api::{ClientHost, FramerateLimitEvent, Hooks, Registrar, RegistrationContext, SettingSpec};
 
 #[derive(Default)]
@@ -37,17 +37,17 @@ impl Hooks for Mod {
         if !host.setting_bool("enable_mod").unwrap_or(true) {
             return;
         }
+        // 0.2.0's index 3 no longer exists in the three-option list. Remap it
+        // on read so the effective 10 FPS cap survives the upgrade instead of
+        // silently falling back to 1 FPS.
+        let minimized_index = migrate_minimized_index(host.setting_choice("minimized_fps").unwrap_or(0));
         let caps = Caps {
             unfocused: pick(
                 &UNFOCUSED,
                 host.setting_choice("unfocused_fps").unwrap_or(2),
                 Caps::default().unfocused,
             ),
-            minimized: pick(
-                &MINIMIZED,
-                host.setting_choice("minimized_fps").unwrap_or(0),
-                Caps::default().minimized,
-            ),
+            minimized: pick(&MINIMIZED, minimized_index, Caps::default().minimized),
         };
         event.limit = limit_for(event.limit, event.focused, event.minimized, caps);
     }

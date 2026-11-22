@@ -233,3 +233,40 @@ mod_itemtooltip.dll      131742  7ff93c08 17fd63e5
 mod_timeformatter.dll    255786  cde02299 0d98fc22
 mod_whenchat.dll         107809  85ed1543 8ba4bc76
 ```
+
+## Review follow-up releases (0.2.1 / 0.2.2)
+
+All seven packages rebuilt with `cargo-horizon-mod build` against pinned SDK
+`5ef7734fdd854add5efd6817178be3c988d8d050` (Mixins `e59da9094f0c2fdda6c627fe9eff22dec6a906f0`,
+game `26.3`), all 66 unit tests passing (dynamicfps 6, appleskin 5, durability 7,
+itemtooltip 10, chathighlight 11, chattimestamps 11, timeformatter 16):
+
+```text
+$ cargo horizon-mod check dynamicfps-0.2.2.hmod
+dynamicfps 0.2.2 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  8962 bytes, SHA-256 4333e46f2c2ba8a3884f88a2ad66b52639168e9f5f908ef7a77c2098ef3958a7, unsigned
+
+$ cargo horizon-mod check appleskin_hzn-0.2.1.hmod
+appleskin_hzn 0.2.1 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  11947 bytes, SHA-256 06e9507f51f95ea72fb7c1b9455a34ac3a5595a753e5fce8a061e2e223006726, unsigned
+
+$ cargo horizon-mod check durability-0.2.2.hmod
+durability 0.2.2 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  11923 bytes, SHA-256 58095f27278f2a5712302b83f2518d61f8df53b85362077b97397523a7900b25, unsigned
+
+$ cargo horizon-mod check itemtooltip-0.2.2.hmod
+itemtooltip 0.2.2 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  9638 bytes, SHA-256 b1157846f1b898b12f1105f780747d65c7517c1ace2f9da4461b1975439dba1b, unsigned
+
+$ cargo horizon-mod check chathighlight-0.2.1.hmod
+chathighlight 0.2.1 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  11159 bytes, SHA-256 4647fba7403ae681bf9833fd33617f2ce0502955046ba056866b16a648aadea3, unsigned
+
+$ cargo horizon-mod check chattimestamps-0.2.1.hmod
+chattimestamps 0.2.1 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  12743 bytes, SHA-256 5100dab16ce4b4e586cfd926f707b96a3e61018b1829f91fe2bf4db4efd99ccd, unsigned
+
+$ cargo horizon-mod check timeformatter-0.2.1.hmod
+timeformatter 0.2.1 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
+  13827 bytes, SHA-256 dbc85ceb65fdca88d582a9eacd9bbdac62dbe2e216f1c14db495914f8870bcc7, unsigned
+```

@@ -1,6 +1,6 @@
 id = "durability"
 name = "Durability HUD"
-version = "0.2.1"
+version = "0.2.2"
 description = "Shows how much durability your armour and held items have left."
 authors = ["Jorungandr"]
 license = "MIT"

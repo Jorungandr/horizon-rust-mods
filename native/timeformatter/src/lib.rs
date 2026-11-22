@@ -87,10 +87,10 @@ mod tests {
 
     #[test]
     fn leaves_tags_alone_inside_escaped_literal() {
-        let out = rewrite(Text::literal("<<t:1704067200:t>"));
+        let out = rewrite(Text::literal("<<t:1704067200:t>>"));
         let TextContent::Literal(text) = &out.content else {
             panic!("literal lost");
         };
-        assert_eq!(text, "<<t:1704067200:t>");
+        assert_eq!(text, "<<t:1704067200:t>>");
     }
 }

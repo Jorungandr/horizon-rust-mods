@@ -1,7 +1,7 @@
 //! Pure layout and food maths, kept apart from the game so it can be tested on its own.
-//! The saturation icons are the original AppleSkin pixel art (squeek502, Unlicense),
-//! ported verbatim: an ASCII grid mapped through a fixed palette and drawn with
-//! 1x1 fills, exactly the way the reference mod renders them.
+//! The saturation icons are an original pixel-art recreation drawn from the
+//! feature description: an ASCII grid mapped through a fixed palette and drawn
+//! with 1x1 fills. No artwork from AppleSkin is bundled or copied.
 
 use mod_api::Tag;
 
@@ -12,9 +12,9 @@ pub const BAR_RIGHT: f32 = 91.0;
 pub const BAR_BOTTOM: f32 = 39.0;
 
 /// One saturation icon, four frames from a bare bone to a full drumstick.
-/// Each char is a palette index ('a'..'j'); '.' is transparent. This is the
-/// original AppleSkin artwork, which is why it reads as a golden-brown
-/// drumstick rather than a flat bar or a garish solid-yellow blob.
+/// Each char is a palette index ('a'..'j'); '.' is transparent. The hand-drawn
+/// golden-brown palette makes it read as a drumstick rather than a flat bar or
+/// a garish solid-yellow blob; it is original artwork, not copied pixels.
 pub const SATURATION: [&[&str]; 4] = [
     &[
         ".........",
@@ -122,8 +122,8 @@ pub struct FoodValue {
     /// Food points the item restores, `nutrition` in `minecraft:food`.
     pub nutrition: i32,
     /// Saturation points the item restores, `saturation` in the component.
-    /// Newer Minecraft data packs this as the final value (a steak is 12.8),
-    /// not the old 0.8-style multiplier.
+    /// Minecraft packs this as the final value (a steak is 12.8), not as a
+    /// multiplier to be applied to the nutrition.
     pub saturation: f32,
 }
 
@@ -146,32 +146,27 @@ pub fn parse_food(tag: &Tag) -> Option<FoodValue> {
         Some(Tag::Short(value)) => i32::from(*value),
         _ => return None,
     };
-    // Newer Minecraft writes saturation as the final points gained (steak 12.8).
-    // Some data packs still store a multiplier; at <= 2 it is safely ambiguous,
-    // so convert that old form with nutrition * modifier * 2.
-    let raw = match tag.get("saturation") {
+    // Minecraft writes saturation as the final points gained (steak 12.8).
+    // Treat it as final even when it is small: multiplying values <= 2 by the
+    // nutrition would inflate most vanilla foods.
+    let saturation = match tag.get("saturation") {
         Some(Tag::Float(bits)) => f32::from_bits(*bits),
         Some(Tag::Double(bits)) => f64::from_bits(*bits) as f32,
         _ => 0.0,
-    };
-    let saturation = if raw.abs() <= 2.0 {
-        nutrition as f32 * raw * 2.0
-    } else {
-        raw
     };
     Some(FoodValue { nutrition, saturation })
 }
 
 /// One tooltip line per fact, already in the order they should appear.
-/// Chinese labels, styled like AppleSkin's vanilla-style food values.
+/// English labels, styled like the reference mod's vanilla-style food values.
 pub fn tooltip_lines(value: FoodValue) -> Vec<(String, u32)> {
     let mut lines = Vec::new();
     if value.nutrition != 0 {
-        lines.push((format!("恢复饥饿 +{}", value.nutrition), 0x55FF55));
+        lines.push((format!("Hunger +{}", value.nutrition), 0x55FF55));
     }
     let gain = value.saturation_gain();
     if gain > 0.0 {
-        lines.push((format!("饱和度 +{gain:.1}"), 0xFFD9A21B));
+        lines.push((format!("Saturation +{gain:.1}"), 0xFFD9A21B));
     }
     lines
 }
@@ -222,15 +217,7 @@ mod tests {
         assert!((value.saturation_gain() - 12.8).abs() < 0.001);
         let lines = tooltip_lines(value);
         assert_eq!(lines.len(), 2);
-        assert_eq!(lines[0].0, "恢复饥饿 +8");
-        assert_eq!(lines[1].0, "饱和度 +12.8");
-    }
-
-    #[test]
-    fn old_multiplier_form_is_converted() {
-        let raw = 0.8_f32;
-        let nutrition = 8;
-        let saturation = if raw.abs() <= 2.0 { nutrition as f32 * raw * 2.0 } else { raw };
-        assert!((saturation - 12.8).abs() < 0.001);
+        assert_eq!(lines[0].0, "Hunger +8");
+        assert_eq!(lines[1].0, "Saturation +12.8");
     }
 }

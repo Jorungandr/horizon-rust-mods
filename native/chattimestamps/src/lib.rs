@@ -50,18 +50,18 @@ impl Hooks for Mod {
     fn register(&self, r: &mut dyn Registrar, _cx: &RegistrationContext) {
         let _ = r.register_setting(SettingSpec::toggle(
             "enable_mod",
-            "chattimestamps.setting.enable",
+            "Enable Chat Timestamps",
             true,
         ));
         let _ = r.register_setting(SettingSpec::choice(
             "format",
-            "chattimestamps.setting.format",
+            "Timestamp format",
             FORMAT_PRESETS.iter().map(|(_, label)| *label),
             0,
         ));
         let _ = r.register_setting(SettingSpec::toggle(
             "enable_hover",
-            "chattimestamps.setting.hover",
+            "Show full date on hover",
             false,
         ));
     }

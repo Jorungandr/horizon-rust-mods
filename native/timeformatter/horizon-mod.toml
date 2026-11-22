@@ -1,6 +1,6 @@
 id = "timeformatter"
 name = "Time Formatter"
-version = "0.2.0"
+version = "0.2.1"
 description = "Formats Discord-style <t:...> timestamps in chat (local time on Windows, UTC elsewhere). Port of M3z0id/TimeFormatter (MIT)."
 authors = ["M3z0id", "Jorungandr"]
 license = "MIT"

@@ -19,13 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-This license covers the original works in this repository: the three mods in
-`mods/ports/`, the new-format projects in `mods/native-v2/`, and the scripts in
-`tools/`. The three ported mods in `mods/whenchat-horizon/`,
-`mods/chattimestamps-horizon/` and `mods/timeformatter-horizon/` are MIT-licensed
-by their respective original authors; see each directory's LICENSE and NOTICE.md.
-The compiled game binary distributed in the release embeds Horizon, which is
-LGPL-3.0-or-later; see NOTICE.md.

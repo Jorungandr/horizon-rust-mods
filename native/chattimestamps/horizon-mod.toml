@@ -1,6 +1,6 @@
 id = "chattimestamps"
 name = "Chat Timestamps"
-version = "0.2.0"
+version = "0.2.1"
 description = "Chat timestamps with six preset formats and optional hover. Port of PlagueTR/ChatTimestamps (MIT)."
 authors = ["PlagueTR", "Jorungandr"]
 license = "MIT"

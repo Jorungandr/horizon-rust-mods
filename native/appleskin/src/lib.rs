@@ -51,9 +51,9 @@ impl Hooks for Mod {
         };
         let [width, height] = event.batch.size();
 
-        // Draw the original AppleSkin saturation icons pixel by pixel, in the
-        // same golden-brown palette the reference mod uses. Each icon is a
-        // 9x9 ASCII grid; '.' cells are transparent and skipped.
+        // Draw our original golden-brown saturation icons pixel by pixel, in
+        // the palette chosen for this port. Each icon is a 9x9 ASCII grid;
+        // '.' cells are transparent and skipped.
         for (index, frame) in saturation_icons(food.saturation) {
             let [ox, oy] = icon_origin(width, height, index);
             for (row, line) in SATURATION[frame].iter().enumerate() {

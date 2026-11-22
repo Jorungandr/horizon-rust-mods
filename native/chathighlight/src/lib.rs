@@ -38,13 +38,21 @@ fn recolor(node: Text, words: &[String], match_case: bool, color: &str) -> Text 
             // would duplicate hover/click (and item) data copied from a server
             // chat line, which a crafted message could amplify to stall clients.
             let children = std::mem::take(&mut node.children);
-            let mut parts = Vec::with_capacity(pieces.len());
+            let mut parts = Vec::with_capacity(pieces.len() + 1);
+            let mut last_hit = false;
             for piece in pieces {
+                last_hit = piece.hit;
                 let mut part = Text::literal(piece.text);
                 if piece.hit {
                     part.style.color = Some(color.to_owned());
                 }
                 parts.push(part);
+            }
+            // Attached siblings inherit the style of their parent fragment. If
+            // the keyword is the trailing fragment, putting them under it would
+            // colour the following text too. Give them an empty, unstyled tail.
+            if !children.is_empty() && last_hit {
+                parts.push(Text::literal(String::new()));
             }
             if let Some(last) = parts.last_mut() {
                 last.children = children;
@@ -88,27 +96,24 @@ impl Hooks for Mod {
     fn register(&self, r: &mut dyn Registrar, _cx: &RegistrationContext) {
         let _ = r.register_setting(SettingSpec::toggle(
             "enable_mod",
-            "chathighlight.setting.enable",
+            "Enable Chat Highlight",
             true,
         ));
         let _ = r.register_setting(SettingSpec::choice(
             "keywords",
-            "chathighlight.setting.keywords",
-            ["chathighlight.pack.server", "chathighlight.pack.greetings",
-             "chathighlight.pack.help", "chathighlight.pack.warning"],
+            "Keyword pack",
+            ["Server", "Greetings", "Help", "Warning"],
             0,
         ));
         let _ = r.register_setting(SettingSpec::choice(
             "color",
-            "chathighlight.setting.color",
-            ["chathighlight.color.gold", "chathighlight.color.red",
-             "chathighlight.color.aqua", "chathighlight.color.green",
-             "chathighlight.color.yellow", "chathighlight.color.light_purple"],
+            "Highlight colour",
+            ["Gold", "Red", "Aqua", "Green", "Yellow", "Light purple"],
             0,
         ));
         let _ = r.register_setting(SettingSpec::toggle(
             "match_case",
-            "chathighlight.setting.match_case",
+            "Match case",
             false,
         ));
     }
@@ -193,6 +198,17 @@ mod tests {
         assert_eq!(pieces.len(), 2);
         assert_eq!(pieces[0].style.color, None);
         assert_eq!(pieces[1].style.color.as_deref(), Some("gold"));
+    }
+
+    #[test]
+    fn trailing_keyword_does_not_colour_attached_text() {
+        let original = Text::literal("meet SERVER").append(Text::literal(" and Alice"));
+        let words = vec!["server".to_owned()];
+        let out = recolor(original, &words, false, "gold");
+        let tail = out.children.last().expect("tail fragment");
+        assert_eq!(tail.style.color, None, "attached text must not inherit the hit colour");
+        assert_eq!(tail.children.len(), 1);
+        assert_eq!(tail.children[0].style.color, None);
     }
 
     #[test]

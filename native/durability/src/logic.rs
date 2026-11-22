@@ -22,15 +22,16 @@ impl Slot {
         Self::MainHand,
         Self::OffHand,
     ];
-    /// Short Chinese slot label for the compact HUD row.
+    /// Short English slot label, used only when the game has no localised item
+    /// name to show. The HUD prefers `item.<id>` translations at runtime.
     pub fn name(self) -> &'static str {
         match self {
-            Self::Head => "头盔",
-            Self::Chest => "胸甲",
-            Self::Legs => "护腿",
-            Self::Feet => "靴子",
-            Self::MainHand => "主手",
-            Self::OffHand => "副手",
+            Self::Head => "Helmet",
+            Self::Chest => "Chestplate",
+            Self::Legs => "Leggings",
+            Self::Feet => "Boots",
+            Self::MainHand => "Main Hand",
+            Self::OffHand => "Off Hand",
         }
     }
 }
@@ -117,8 +118,8 @@ impl Bar {
         }
     }
     /// The single text row for this bar. `item` is the already-localised item
-    /// name (e.g. `铜头盔`), which itself says helmet/chestplate, so no extra
-    /// slot prefix is needed — keeping the row short.
+    /// name (e.g. `Iron Helmet`), which itself says helmet/chestplate, so no
+    /// extra slot prefix is needed — keeping the row short.
     pub fn row(&self, show_percent: bool) -> String {
         if show_percent {
             format!("{} {}", self.item, self.label())
@@ -214,6 +215,13 @@ mod tests {
         assert_eq!(item_label("minecraft:iron_chestplate"), "Iron Chestplate");
         assert_eq!(item_label("mymod:oil_drum"), "Oil Drum");
         assert_eq!(item_label("stone"), "Stone");
+    }
+
+    #[test]
+    fn slot_fallbacks_are_english() {
+        assert_eq!(Slot::Head.name(), "Helmet");
+        assert_eq!(Slot::MainHand.name(), "Main Hand");
+        assert!(Slot::ALL.iter().all(|slot| slot.name().is_ascii()));
     }
 
     #[test]
