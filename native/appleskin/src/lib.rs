@@ -4,8 +4,8 @@ mod logic;
 
 use logic::{SATURATION, cell_color, icon_origin, parse_food, saturation_icons, tooltip_lines};
 use mod_api::{
-    ClientHost, ComponentId, GuiRenderPostEvent, Hooks, ItemResource, ItemTooltipEvent, Registrar,
-    RegistrationContext, SettingSpec, Text,
+    ClientHost, ComponentId, GuiLayerPostEvent, Hooks, HudMode, ItemResource, ItemTooltipEvent,
+    Registrar, RegistrationContext, SettingSpec, Text,
 };
 
 #[derive(Default)]
@@ -27,13 +27,10 @@ impl Hooks for Mod {
         ));
     }
 
-    fn gui_render_post(&self, host: &dyn ClientHost, event: &mut GuiRenderPostEvent<'_>) {
-        // While paused the world (and the real HUD) is blurred and dimmed, but
-        // this post-hook draws after that scrim, leaving the overlay alone and
-        // unnaturally crisp. Hide it entirely during pause so it obeys the same
-        // treatment as everything else.
-        if event.gui_hidden
-            || host.is_paused()
+    fn gui_layer_post(&self, host: &dyn ClientHost, event: &mut GuiLayerPostEvent<'_>) {
+        // Draw with the hunger bar so screen backgrounds affect both the same way.
+        if event.layer != "minecraft:player_health"
+            || host.hud_mode() != HudMode::AllVisible
             || !host.setting_bool("enable_mod").unwrap_or(true)
             || !host.setting_bool("show_saturation").unwrap_or(true)
         {
@@ -49,7 +46,7 @@ impl Hooks for Mod {
         let Some(food) = player.food(host) else {
             return;
         };
-        let [width, height] = event.batch.size();
+        let [width, height] = event.draw.size();
 
         // Draw our original golden-brown saturation icons pixel by pixel, in
         // the palette chosen for this port. Each icon is a 9x9 ASCII grid;
@@ -59,7 +56,7 @@ impl Hooks for Mod {
             for (row, line) in SATURATION[frame].iter().enumerate() {
                 for (col, ch) in line.bytes().enumerate() {
                     if let Some(argb) = cell_color(ch) {
-                        event.batch.fill([ox + col as f32, oy + row as f32, 1.0, 1.0], argb);
+                        event.draw.fill([ox + col as f32, oy + row as f32, 1.0, 1.0], argb);
                     }
                 }
             }
