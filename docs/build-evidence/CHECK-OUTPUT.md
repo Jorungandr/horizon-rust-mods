@@ -248,7 +248,7 @@ dynamicfps 0.2.2 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988
 
 $ cargo horizon-mod check appleskin_hzn-0.2.1.hmod
 appleskin_hzn 0.2.1 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
-  11947 bytes, SHA-256 06e9507f51f95ea72fb7c1b9455a34ac3a5595a753e5fce8a061e2e223006726, unsigned
+  12756 bytes, SHA-256 c38bfd39127527e9cf6117392613b488ad7e53b41372d0018701001f82503057, unsigned
 
 $ cargo horizon-mod check durability-0.2.2.hmod
 durability 0.2.2 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
@@ -270,3 +270,42 @@ $ cargo horizon-mod check timeformatter-0.2.1.hmod
 timeformatter 0.2.1 (native-mod, format native-1/5ef7734fdd854add5efd6817178be3c988d8d050/e59da9094f0c2fdda6c627fe9eff22dec6a906f0, for 26.3)
   13827 bytes, SHA-256 dbc85ceb65fdca88d582a9eacd9bbdac62dbe2e216f1c14db495914f8870bcc7, unsigned
 ```
+
+### Launcher build receipt for the follow-up batch (`native-5ef7734-32225d2c7e2a`)
+
+Compiled with `horizon-launcher.exe native-build` against the pinned SDK
+(`horizon = 5ef7734fdd854add5efd6817178be3c988d8d050`,
+`horizon_mixins = e59da9094f0c2fdda6c627fe9eff22dec6a906f0`,
+`rust = 1.99.1`, `profile = optimized`, `route = prebuilt-api`, `left_out = []`):
+
+```text
+$ horizon-launcher.exe native-build native/ --instance horizon --version nightly-2026-11-19-5ef7734 --trust-native-code
+Checking 10 mods
+Using the mod tools for the Nov 19 update kept from an earlier build
+Prebuilt game: only the mods compile (optimized)
+Compiling the mods against the prebuilt game
+Compiling appleskin_hzn (1 of 10)
+Compiling chathighlight (2 of 10)
+Compiling chattimestamps (3 of 10)
+Compiling coords (4 of 10)
+Compiling durability (5 of 10)
+Compiling dynamicfps (6 of 10)
+Compiling fpshud (7 of 10)
+Compiling itemtooltip (8 of 10)
+Compiling timeformatter (9 of 10)
+Compiling whenchat (10 of 10)
+Installing the build
+Your mods are built (took 16 s).
+```
+
+Installed dynlibs and manifest digests from `native-5ef7734-32225d2c7e2a/native-mods.json`:
+
+| mod id | version | .hmod SHA-256 (registry) | compiled DLL | DLL SHA-256 |
+| --- | --- | --- | --- | --- |
+| `appleskin_hzn` | `0.2.1` | `c38bfd39127527e9cf6117392613b488ad7e53b41372d0018701001f82503057` | `mod_appleskin.dll` | `1ebd0a4b8193de4f6e0e5b207c6ca3891c93da0907aad5a0054d208225d1671d` |
+| `chathighlight` | `0.2.1` | `4647fba7403ae681bf9833fd33617f2ce0502955046ba056866b16a648aadea3` | `mod_chathighlight.dll` | `f20418439dcb08449b5b55028edb6405c38ff43203d9cdfb3badb5b35057ed8b` |
+| `chattimestamps` | `0.2.1` | `5100dab16ce4b4e586cfd926f707b96a3e61018b1829f91fe2bf4db4efd99ccd` | `mod_chattimestamps.dll` | `7587ed52fc503e927d2c4c9155a768720c851c3e3481d0d0af34f2479307e8b9` |
+| `durability` | `0.2.2` | `58095f27278f2a5712302b83f2518d61f8df53b85362077b97397523a7900b25` | `mod_durability.dll` | `33d0c073f2636e2b929d7b40604f259e17d372e9a2cb6b3410d62043211b0566` |
+| `dynamicfps` | `0.2.2` | `4333e46f2c2ba8a3884f88a2ad66b52639168e9f5f908ef7a77c2098ef3958a7` | `mod_dynamicfps.dll` | `fbc9e0fd7f6b28007ed86b6b97ee159c7daa940a9322d0100426574f904b7cb8` |
+| `itemtooltip` | `0.2.2` | `b1157846f1b898b12f1105f780747d65c7517c1ace2f9da4461b1975439dba1b` | `mod_itemtooltip.dll` | `dac04d6c3e653ab334839813e2a38969ff26ba0cf7a2a3e5704248f538c7678b` |
+| `timeformatter` | `0.2.1` | `dbc85ceb65fdca88d582a9eacd9bbdac62dbe2e216f1c14db495914f8870bcc7` | `mod_timeformatter.dll` | `fa99dfbf175dc9322e17e7f421c3e60dbc115f1f4c1e96b35ec3beb1d2bac6ed` |

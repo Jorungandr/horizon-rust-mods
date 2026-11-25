@@ -1,7 +1,6 @@
 //! Pure layout and food maths, kept apart from the game so it can be tested on its own.
-//! The saturation icons are an original pixel-art recreation drawn from the
-//! feature description: an ASCII grid mapped through a fixed palette and drawn
-//! with 1x1 fills. No artwork from AppleSkin is bundled or copied.
+//! The four 9x9 saturation overlay sprites below are transcribed from upstream
+//! AppleSkin by squeek502 (The Unlicense), credited in NOTICE.md.
 
 use mod_api::Tag;
 
@@ -11,10 +10,9 @@ pub const STEP: f32 = 8.0;
 pub const BAR_RIGHT: f32 = 91.0;
 pub const BAR_BOTTOM: f32 = 39.0;
 
-/// One saturation icon, four frames from a bare bone to a full drumstick.
-/// Each char is a palette index ('a'..'j'); '.' is transparent. The hand-drawn
-/// golden-brown palette makes it read as a drumstick rather than a flat bar or
-/// a garish solid-yellow blob; it is original artwork, not copied pixels.
+/// One saturation icon, four frames from a bare bone to a full drumstick,
+/// transcribed from AppleSkin's HUD sprite sheet (The Unlicense, squeek502).
+/// Each char is a palette index ('a'..'j'); '.' is transparent.
 pub const SATURATION: [&[&str]; 4] = [
     &[
         ".........",
